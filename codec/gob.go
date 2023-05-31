@@ -17,7 +17,7 @@ type GobCodec struct {
 func NewGobCodec(conn io.ReadWriteCloser) Codec {
 	return &GobCodec{
 		conn: conn,
-		buf:  bufio.NewWriter(conn),
+		buf:  bufio.NewWriter(conn), //improve the performance of I/O operations by reducing the number of system calls
 		enc:  gob.NewEncoder(conn),
 		dec:  gob.NewDecoder(conn),
 	}
