@@ -105,14 +105,17 @@ func (c *Client) receive() {
 		case call == nil:
 			// it usually means that Write partially failed
 			// and call was already removed.
+			log.Println("rpc client reveive empty call")
 			err = c.cc.ReadBody(nil)
 		case h.Error != "":
+			log.Println("rpc client reveive h.Error!=nil")
 			call.Err = fmt.Errorf(h.Error)
 			err = c.cc.ReadBody(nil)
 			call.done()
 		default:
 			err = c.cc.ReadBody(call.Reply)
 			if err != nil {
+				log.Println("rpc client reveive readbody err:", err)
 				call.Err = errors.New("reading body " + err.Error())
 			}
 			call.done()
@@ -140,7 +143,7 @@ func (c *Client) send(call *Call) (err error) {
 
 	err = c.cc.Write(&codec.Header{ServiceMethod: call.ServiceMethod, Seq: call.Seq}, call.Args)
 	if err != nil {
-		log.Println("rpc client sned write err:", err)
+		log.Println("rpc client send write err:", err)
 		call.Err = err
 		call.done()
 		return err
