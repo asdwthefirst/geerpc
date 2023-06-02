@@ -10,19 +10,23 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 )
 
 const MagicNumber = 0x3bef5c
 
 // Option Option采用JSON编码，header和body采用option中的解码方式解码
 type Option struct {
-	MagicNumber int //标志是geerpc请求
-	CodecType   codec.Type
+	MagicNumber    int //标志是geerpc请求
+	CodecType      codec.Type
+	ConnectTimeout time.Duration //0代表没有限制
+	HandleTimeout  time.Duration
 }
 
 var DefaultOption = &Option{
-	MagicNumber: MagicNumber,
-	CodecType:   codec.GobType,
+	MagicNumber:    MagicNumber,
+	CodecType:      codec.GobType,
+	ConnectTimeout: 10 * time.Second,
 }
 
 // Server Server实例负责监听请求
