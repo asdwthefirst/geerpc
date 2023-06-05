@@ -182,11 +182,13 @@ type clientResult struct {
 	err    error
 }
 
+type newClientFunc func(conn net.Conn, opt *Option) (client *Client, err error)
+
 func Dial(network, address string, opts ...*Option) (client *Client, err error) {
-	return DialTimeout(network, address, opts...)
+	return dialTimeout(NewClient, network, address, opts...)
 }
 
-func DialTimeout(network, address string, opts ...*Option) (client *Client, err error) {
+func dialTimeout(f newClientFunc, network, address string, opts ...*Option) (client *Client, err error) {
 	opt, err := parseOption(opts...)
 	if err != nil {
 		return nil, err
@@ -206,7 +208,7 @@ func DialTimeout(network, address string, opts ...*Option) (client *Client, err 
 	ch := make(chan clientResult)
 
 	go func() {
-		client, err = NewClient(conn, opt)
+		client, err = f(conn, opt)
 		ch <- clientResult{client: client, err: err}
 	}()
 
