@@ -19,18 +19,24 @@ func (f Foo) Sum(args Args, reply *int) error {
 }
 
 func startServer(addr chan string) {
+	//var foo Foo
+	//if err := geerpc.Register(&foo); err != nil {
+	//	log.Fatal("register error:", err)
+	//}
+	//// 选一个空闲端口
+	//l, err := net.Listen("tcp", ":0")
+	//if err != nil {
+	//	log.Fatal("network error:", err)
+	//}
+	//log.Println("start rpc server on", l.Addr())
+	//addr <- l.Addr().String()
+	//geerpc.Accept(l)
 	var foo Foo
-	if err := geerpc.Register(&foo); err != nil {
-		log.Fatal("register error:", err)
-	}
-	// 选一个空闲端口
-	l, err := net.Listen("tcp", ":0")
-	if err != nil {
-		log.Fatal("network error:", err)
-	}
-	log.Println("start rpc server on", l.Addr())
+	l, _ := net.Listen("tcp", ":9999")
+	_ = geerpc.Register(&foo)
 	addr <- l.Addr().String()
-	geerpc.Accept(l)
+	geerpc.HandleHTTP(l)
+	//_ = http.Serve(l, nil)
 }
 
 func main() {
@@ -39,7 +45,8 @@ func main() {
 
 	// 模拟客户端发出请求
 	//不传opt使用默认opt
-	client, _ := geerpc.Dial("tcp", <-addr)
+	//client, _ := geerpc.Dial("tcp", <-addr)
+	client, _ := geerpc.DialHTTP("tcp", <-addr)
 	defer func() { _ = client.Close() }()
 
 	time.Sleep(time.Second)
@@ -60,4 +67,5 @@ func main() {
 		}(i)
 	}
 	wg.Wait()
+	select {}
 }

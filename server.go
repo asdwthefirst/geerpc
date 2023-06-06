@@ -218,9 +218,9 @@ func (server *Server) sendResponse(cc codec.Codec, header *codec.Header, body in
 }
 
 const (
-	connected      = "200 Connected to Gee RPC"
-	defaultRPCPath = "/_geeprc_"
-	//defaultDebugPath = "/debug/geerpc"
+	connected        = "200 Connected to Gee RPC"
+	defaultRPCPath   = "/_geeprc_"
+	defaultDebugPath = "/debug/geerpc"
 )
 
 func (server *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -239,10 +239,16 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	server.ServeConn(conn)
 }
 
-func (server *Server) HandleHTTP() {
+func (server *Server) HandleHTTP(lis net.Listener) {
 	http.Handle(defaultRPCPath, server) //注册connect接口
+	http.Handle(defaultDebugPath, debugHTTP{server})
+	log.Println("rpc server debug path:", defaultDebugPath)
+	err := http.Serve(lis, nil)
+	if err != nil {
+		log.Fatalf("rpc server serve error: %v", err)
+	}
 }
 
-func HandleHTTP() {
-	DefaultServer.HandleHTTP()
+func HandleHTTP(lis net.Listener) {
+	DefaultServer.HandleHTTP(lis)
 }
