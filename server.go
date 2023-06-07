@@ -133,7 +133,7 @@ func (server *Server) serveCodec(cc codec.Codec, timeout time.Duration) {
 			continue
 		}
 		wg.Add(1)
-		server.handleRequest(cc, req, wg, sending, timeout)
+		go server.handleRequest(cc, req, wg, sending, timeout)
 	}
 	wg.Wait()
 	_ = cc.Close()

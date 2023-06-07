@@ -84,7 +84,7 @@ func (xc *XClient) Broadcast(ctx context.Context, serviceMethod string, args, re
 	var mu sync.Mutex //保护e和replyDone和reply
 	var e error
 	var replyDone bool
-	reply = reply == nil //reply为nil时，不需要写返回
+	replyDone = reply == nil //reply为nil时，不需要写返回
 	ctx, cancel := context.WithCancel(ctx)
 	for _, rpcAddr := range rpcAddrs {
 		wg.Add(1)
@@ -92,7 +92,8 @@ func (xc *XClient) Broadcast(ctx context.Context, serviceMethod string, args, re
 			defer wg.Done()
 			var clonedReply interface{}
 			if reply != nil {
-				clonedReply = reflect.New(reflect.TypeOf(reply)).Elem()
+				//clonedReply = reflect.New(reflect.TypeOf(reply)).Interface()
+				clonedReply = reflect.New(reflect.ValueOf(reply).Elem().Type()).Interface() //valueof转化为value，可以兼容指针和非指针类型
 			}
 			err = xc.call(ctx, rpcAddr, serviceMethod, args, clonedReply) //并发call提高效率，reply涉及写入，使用clonedReply避免数据竞争
 			mu.Lock()

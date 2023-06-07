@@ -308,7 +308,7 @@ func (c *Client) Call(ctx context.Context, serviceMethod string, args, reply int
 	select {
 	case <-ctx.Done():
 		c.removeCall(call.Seq)
-		return errors.New("rpc client: call failed: ctx Done: " + ctx.Err().Error())
+		return errors.New(fmt.Sprintf("rpc client: call failed: ctx Done: %p ", ctx) + ctx.Err().Error())
 	case call = <-call.Done:
 		return call.Err
 	}
